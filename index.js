@@ -10,6 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 /*  
+
 // get the items
 app.get('/product')
 app.get('/product/:id')
@@ -36,7 +37,7 @@ app.get("/", (req, res) => {
 app.post("/user", (req, res) => {
   try {
     const { user } = req.body;
-    
+
   } catch (error) {
     res.send(error.message);
   }
