@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-
+const { MongoClient, ServerApiVersion } = require('mongodb'); 
 const port = process.env.PORT || 5000;
 require("dotenv").config();
 require("colors");
@@ -9,8 +9,21 @@ require("colors");
 app.use(cors());
 app.use(express.json());
 
-/*  
 
+const uri = `mongodb+srv://${process.env.MONGODB_ID}:${process.env.MONGODB_PASS}@cluster0.ha2hum3.mongodb.net/?retryWrites=true&w=majority`;
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+const run = async() =>{
+  try {
+    client.connect()
+    console.log("database connect");
+  } catch (error) {
+    console.log(error.message)
+  }
+}
+run();
+const resaleDevice = client.db("mobileCollection").collection("devices");
+/*  
 // get the items
 app.get('/product')
 app.get('/product/:id')
@@ -22,6 +35,7 @@ app.put('/product/:id')
 // delete the items
 app.delete('product/:id);
 */
+
 
 // this is gate section
 
@@ -42,6 +56,9 @@ app.post("/user", (req, res) => {
     res.send(error.message);
   }
 });
+
+// login 
+
 
 // this is update section
 
