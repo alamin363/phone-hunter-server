@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const { MongoClient, ServerApiVersion } = require('mongodb'); 
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 5000;
 require("dotenv").config();
 require("colors");
@@ -9,20 +9,29 @@ require("colors");
 app.use(cors());
 app.use(express.json());
 
-
 const uri = `mongodb+srv://${process.env.MONGODB_ID}:${process.env.MONGODB_PASS}@cluster0.ha2hum3.mongodb.net/?retryWrites=true&w=majority`;
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+const client = new MongoClient(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverApi: ServerApiVersion.v1,
+});
 
-const run = async() =>{
+const run = async () => {
   try {
-    client.connect()
+    client.connect();
     console.log("database connect");
   } catch (error) {
-    console.log(error.message)
+    console.log(error.message);
   }
-}
+};
 run();
-const resaleDevice = client.db("mobileCollection").collection("devices");
+const resaleDeviceCollection = client
+  .db("mobileCollection")
+  .collection("devices");
+const userCollection = client.db("mobileCollection").collection("user");
+const sellerCollection = client.db("mobileCollection").collection("seller");
+const productsCollection = client.db("mobileCollection").collection("devices");
+const bookingCollection = client.db("mobileCollection").collection("booking");
 /*  
 // get the items
 app.get('/product')
@@ -36,6 +45,12 @@ app.put('/product/:id')
 app.delete('product/:id);
 */
 
+// const updateDoc = {
+//   $set:{
+//     paid: true,
+//     transactionId: data.transactionId
+//   }
+// }
 
 // this is gate section
 
@@ -47,18 +62,60 @@ app.get("/", (req, res) => {
   }
 });
 
-// this is post section
-app.post("/user", (req, res) => {
+app.get("/category", async(req, res) => {
   try {
-    const { user } = req.body;
 
+    // const query = { category: 82488123 }
+    const query = { }
+    const products = await productsCollection.find(query).toArray();
+    res.send(products)
+
+  } catch (error) {
+    res.send(error.message)
+  }
+});
+app.get("/category/:id", async(req, res) => {
+  try {
+    const query = {_id:ObjectId(req.params.id) }
+    const AllData = await productsCollection.find(query).toArray();
+    res.send(AllData)
+
+  } catch (error) {
+    res.send(error.message)
+  }
+});
+app.get("/bookingProduct", async (req, res) => {
+  try {
+    const email = req.query.email
+    const query = {users: email}
+    const result = await bookingCollection.find(query).toArray();
+    res.send(result)
+  } catch (error) {
+    res.send(error.message)
+  }
+});
+
+// this is post section
+app.post("/user", async (req, res) => {
+  try {
+    const result = await userCollection.insertOne(req.body);
+    res.send(result);
   } catch (error) {
     res.send(error.message);
   }
 });
+app.post("/bookingProduct", async (req, res) => {
+  try {
+    console.log(req.body)
+    const result = await bookingCollection.insertOne(req.body);
+    res.send(result)
+  } catch (error) {
+    res.send(error.message)
+  }
+});
 
-// login 
 
+// login
 
 // this is update section
 
