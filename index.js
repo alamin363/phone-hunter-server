@@ -93,7 +93,7 @@ app.get("/bookingProduct", async (req, res) => {
   } catch (error) {
     res.send(error.message)
   }
-});
+})
 
 // this is post section
 app.post("/user", async (req, res) => {
