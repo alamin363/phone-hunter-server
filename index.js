@@ -32,6 +32,10 @@ const userCollection = client.db("mobileCollection").collection("user");
 const sellerCollection = client.db("mobileCollection").collection("seller");
 const productsCollection = client.db("mobileCollection").collection("devices");
 const bookingCollection = client.db("mobileCollection").collection("booking");
+const allProductCollection = client
+  .db("mobileCollection")
+  .collection("allProduct");
+const categoryCollection = client.db("mobileCollection").collection("category");
 /*  
 // get the items
 app.get('/product')
@@ -62,38 +66,53 @@ app.get("/", (req, res) => {
   }
 });
 
-app.get("/category", async(req, res) => {
+app.get("/category", async (req, res) => {
   try {
-
-    // const query = { category: 82488123 }
-    const query = { }
-    const products = await productsCollection.find(query).toArray();
-    res.send(products)
-
+    const result = await categoryCollection.find({}).toArray();
+    res.send(result);
   } catch (error) {
-    res.send(error.message)
+    res.send(error.message);
   }
 });
-app.get("/category/:id", async(req, res) => {
-  try {
-    const query = {_id:ObjectId(req.params.id) }
-    const AllData = await productsCollection.find(query).toArray();
-    res.send(AllData)
 
+app.get("/category/:id", async (req, res) => {
+  try {
+    console.log(req.params.id);
+    const query = { catagory: req.params.id };
+    const AllData = await allProductCollection.find(query).toArray();
+    res.send(AllData);
   } catch (error) {
-    res.send(error.message)
+    res.send(error.message);
+  }
+});
+app.get("/myproduct", async (req, res) => {
+  try {
+    const email = req.query.email;
+    const query = { email: email };
+    const result = await allProductCollection.find(query).toArray();
+    res.send(result);
+  } catch (error) {
+    res.send(error.message);
   }
 });
 app.get("/bookingProduct", async (req, res) => {
   try {
-    const email = req.query.email
-    const query = {users: email}
+    const email = req.query.email;
+    const query = { users: email };
     const result = await bookingCollection.find(query).toArray();
-    res.send(result)
+    res.send(result);
   } catch (error) {
-    res.send(error.message)
+    res.send(error.message);
   }
-})
+});
+app.get("/user", async (req, res) => {
+  try {
+    const users = await userCollection.find({}).toArray();
+    res.send(users);
+  } catch (error) {
+    res.send(error.message);
+  }
+});
 
 // this is post section
 app.post("/user", async (req, res) => {
@@ -106,14 +125,53 @@ app.post("/user", async (req, res) => {
 });
 app.post("/bookingProduct", async (req, res) => {
   try {
-    console.log(req.body)
-    const result = await bookingCollection.insertOne(req.body);
-    res.send(result)
+    const product = req.body;
+    const result = await allProductCollection.insertOne(product);
+    res.send(result);
   } catch (error) {
-    res.send(error.message)
+    res.send(error.message);
   }
 });
 
+// app.put('/users/admin/:id', verifyJWT, async (req, res) => {
+//   const decodedEmail = req.decoded.email;
+//   const query = { email: decodedEmail };
+//   const user = await usersCollection.findOne(query);
+
+//   if (user?.role !== 'admin') {
+//       return res.status(403).send({ message: 'forbidden access' })
+//   }
+
+//   const id = req.params.id;
+//   const filter = { _id: ObjectId(id) }
+//   const options = { upsert: true };
+//   const updatedDoc = {
+//       $set: {
+//           role: 'admin'
+//       }
+//   }
+//   const result = await usersCollection.updateOne(filter, updatedDoc, options);
+//   res.send(result);
+// })
+
+app.post("/postdata", async (req, res) => {
+  try {
+    const result = await allProductCollection.insertOne(req.body);
+    res.send(result);
+  } catch (error) {
+    res.send(error.message);
+  }
+});
+
+app.delete("/product/:id", async (req, res) => {
+  try {
+    const query = { _id: ObjectId(req.params.id) };
+    const result = await allProductCollection.deleteOne(query);
+    res.send(result);
+  } catch (error) {
+    res.send(error.message);
+  }
+});
 
 // login
 
