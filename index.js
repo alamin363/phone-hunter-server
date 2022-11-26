@@ -166,7 +166,7 @@ app.post("/postdata", async (req, res) => {
 app.delete("/product/:id", async (req, res) => {
   try {
     const query = { _id: ObjectId(req.params.id) };
-    const result = await allProductCollection.deleteOne(query);
+    const result = await allProductCollection.deleteOne(query)
     res.send(result);
   } catch (error) {
     res.send(error.message);
