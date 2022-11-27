@@ -115,6 +115,16 @@ app.get("/user", async (req, res) => {
     res.send(error.message);
   }
 });
+// PROBLAME IS BOGE BRO
+app.get("/user/:email", async (req, res) => {
+  try {
+    const query = {email: req.params.email}
+    const user = await userCollection.findOne(query);
+    res.send(user);
+  } catch (error) {
+    res.send(error.message);
+  }
+});
 app.get("/Advertise", async (req, res) => {
   try {
     const result = await AdvertiseCollection.find({}).toArray();
@@ -168,6 +178,7 @@ app.put("/admin/:id", async (req, res) => {
     const updated = {
       $set: {
         role: "admin",
+        isAdmin: true,
       },
     };
     const result = await userCollection.updateOne(query, updated, options);
