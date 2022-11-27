@@ -36,6 +36,9 @@ const allProductCollection = client
   .db("mobileCollection")
   .collection("allProduct");
 const categoryCollection = client.db("mobileCollection").collection("category");
+const AdvertiseCollection = client
+  .db("mobileCollection")
+  .collection("Advertise");
 /*  
 // get the items
 app.get('/product')
@@ -113,6 +116,15 @@ app.get("/user", async (req, res) => {
     res.send(error.message);
   }
 });
+app.get("/Advertise", async (req, res) => {
+  try {
+    const result = await AdvertiseCollection.find({}).toArray();
+    res.send(result);
+    console.log(result);
+  } catch (error) {
+    res.send({ error: error.message });
+  }
+});
 
 // this is post section
 app.post("/user", async (req, res) => {
@@ -133,6 +145,14 @@ app.post("/bookingProduct", async (req, res) => {
   }
 });
 
+app.post("/Advertise", async (req, res) => {
+  try {
+    const result = await AdvertiseCollection.insertOne(req.body);
+    res.send(result);
+  } catch (error) {
+    res.send({ error: error.message });
+  }
+});
 // app.put('/users/admin/:id', verifyJWT, async (req, res) => {
 //   const decodedEmail = req.decoded.email;
 //   const query = { email: decodedEmail };
@@ -166,7 +186,7 @@ app.post("/postdata", async (req, res) => {
 app.delete("/product/:id", async (req, res) => {
   try {
     const query = { _id: ObjectId(req.params.id) };
-    const result = await allProductCollection.deleteOne(query)
+    const result = await allProductCollection.deleteOne(query);
     res.send(result);
   } catch (error) {
     res.send(error.message);
