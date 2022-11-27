@@ -38,7 +38,7 @@ const allProductCollection = client
 const categoryCollection = client.db("mobileCollection").collection("category");
 const AdvertiseCollection = client
   .db("mobileCollection")
-  .collection("Advertise");
+  .collection("Advertise")
 /*  
 // get the items
 app.get('/product')
@@ -145,7 +145,6 @@ app.get("/Advertise", async (req, res) => {
 // this is post section
 app.post("/user", async (req, res) => {
   try {
-    console.log(req.body);
     const result = await userCollection.insertOne(req.body);
     res.send(result);
   } catch (error) {
