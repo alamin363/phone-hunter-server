@@ -80,7 +80,6 @@ app.get("/category", async (req, res) => {
 
 app.get("/category/:id", async (req, res) => {
   try {
-    console.log(req.params.id);
     const query = { catagory: req.params.id };
     const AllData = await allProductCollection.find(query).toArray();
     res.send(AllData);
@@ -120,7 +119,6 @@ app.get("/Advertise", async (req, res) => {
   try {
     const result = await AdvertiseCollection.find({}).toArray();
     res.send(result);
-    console.log(result);
   } catch (error) {
     res.send({ error: error.message });
   }
@@ -129,6 +127,7 @@ app.get("/Advertise", async (req, res) => {
 // this is post section
 app.post("/user", async (req, res) => {
   try {
+    console.log(req.body);
     const result = await userCollection.insertOne(req.body);
     res.send(result);
   } catch (error) {
@@ -138,7 +137,7 @@ app.post("/user", async (req, res) => {
 app.post("/bookingProduct", async (req, res) => {
   try {
     const product = req.body;
-    const result = await allProductCollection.insertOne(product);
+    const result = await bookingCollection.insertOne(product);
     res.send(result);
   } catch (error) {
     res.send(error.message);
@@ -147,32 +146,36 @@ app.post("/bookingProduct", async (req, res) => {
 
 app.post("/Advertise", async (req, res) => {
   try {
+    // console.log(req.body);
     const result = await AdvertiseCollection.insertOne(req.body);
     res.send(result);
   } catch (error) {
     res.send({ error: error.message });
   }
 });
-// app.put('/users/admin/:id', verifyJWT, async (req, res) => {
-//   const decodedEmail = req.decoded.email;
-//   const query = { email: decodedEmail };
-//   const user = await usersCollection.findOne(query);
 
-//   if (user?.role !== 'admin') {
-//       return res.status(403).send({ message: 'forbidden access' })
-//   }
+app.put("/admin/:id", async (req, res) => {
+  try {
+    // const query = {}
+    // const user = await userCollection.findOne(query);
 
-//   const id = req.params.id;
-//   const filter = { _id: ObjectId(id) }
-//   const options = { upsert: true };
-//   const updatedDoc = {
-//       $set: {
-//           role: 'admin'
-//       }
-//   }
-//   const result = await usersCollection.updateOne(filter, updatedDoc, options);
-//   res.send(result);
-// })
+    // if (user?.role !== 'admin') {
+    //     return res.status(403).send({ message: 'forbidden access' })
+    // }
+
+    const query = { _id: ObjectId(req.params.id) };
+    const options = { upsert: true };
+    const updated = {
+      $set: {
+        role: "admin",
+      },
+    };
+    const result = await userCollection.updateOne(query, updated, options);
+    res.send(result);
+  } catch (error) {
+    res.send(error.message);
+  }
+});
 
 app.post("/postdata", async (req, res) => {
   try {
@@ -187,6 +190,16 @@ app.delete("/product/:id", async (req, res) => {
   try {
     const query = { _id: ObjectId(req.params.id) };
     const result = await allProductCollection.deleteOne(query);
+    res.send(result);
+  } catch (error) {
+    res.send(error.message);
+  }
+});
+
+app.delete("/ads/:id", async (req, res) => {
+  try {
+    const query = { id: req.params.id };
+    const result = await AdvertiseCollection.deleteOne(query);
     res.send(result);
   } catch (error) {
     res.send(error.message);
