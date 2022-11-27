@@ -97,6 +97,14 @@ app.get("/myproduct", async (req, res) => {
     res.send(error.message);
   }
 });
+app.get("/product", async (req, res) => {
+  try {
+    const result = await allProductCollection.find({}).project({image: 1}).toArray();
+    res.send(result);
+  } catch (error) {
+    res.send(error.message);
+  }
+});
 app.get("/bookingProduct", async (req, res) => {
   try {
     const email = req.query.email;
@@ -212,6 +220,16 @@ app.delete("/ads/:id", async (req, res) => {
     const query = { id: req.params.id };
     const result = await AdvertiseCollection.deleteOne(query);
     res.send(result);
+  } catch (error) {
+    res.send(error.message);
+  }
+});
+// delete user and seller by admin
+app.delete("/usersseler/:id", async (req, res) => {
+  try {
+    const query = { _id: ObjectId(req.params.id )};
+    // const result = await userCollection.deleteOne(query);
+    // res.send(result);
   } catch (error) {
     res.send(error.message);
   }
