@@ -2,6 +2,11 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const jwt = require("jsonwebtoken");
+// .env paitece na ????????????
+const stripe = require("stripe")(
+  "pk_test_51M6B1DFokKCixQB7Y8Z9czvVpjrMle29Y2irFLPNQSdqcVpEPrmRSxwwJM2i8EzhBnIeMuevF1Gx63LCYz1hObUo00FNk82CFQ"
+);
+console.log(process.env.STRIP_KEY);
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 5000;
 require("dotenv").config();
@@ -57,6 +62,7 @@ const categoryCollection = client.db("mobileCollection").collection("category");
 const AdvertiseCollection = client
   .db("mobileCollection")
   .collection("Advertise");
+const paymentsCollection = client.db("mobileCollection").collection("payments");
 
 // const update = {
 //   $set:{
@@ -125,7 +131,7 @@ app.get("/bookingProduct", async (req, res) => {
 });
 app.get("/user", async (req, res) => {
   try {
-    const users = await userCollection.find({role: "user"}).toArray();
+    const users = await userCollection.find({ role: "user" }).toArray();
     res.send(users);
   } catch (error) {
     res.send(error.message);
@@ -133,7 +139,7 @@ app.get("/user", async (req, res) => {
 });
 app.get("/seller", async (req, res) => {
   try {
-    const seller = await userCollection.find({role: "seller"}).toArray();
+    const seller = await userCollection.find({ role: "seller" }).toArray();
     res.send(seller);
   } catch (error) {
     res.send(error.message);
@@ -205,6 +211,40 @@ app.post("/Advertise", async (req, res) => {
   }
 });
 
+// app.post("/payments/mobile", async (req, res) => {
+//   const payment = req.body;
+//   const result = await paymentsCollection.insertOne(payment);
+//   const id = payment.bookingId;
+//   const filter = { _id: ObjectId(id) };
+//   const updatedDoc = {
+//     $set: {
+//       paid: true,
+//       transactionId: payment.transactionId,
+//     },
+//   };
+//   const updatedResult = await bookingsCollection.updateOne(filter, updated);
+//   res.send(result);
+// });
+
+app.post("/create-payment-phone", async (req, res) => {
+  try {
+    const bookingPhone = req.body;
+  const price = bookingPhone.price;
+  const amount = price * 100;
+
+  const paymentIntent = await stripe.paymentIntents.create({
+    currency: "usd",
+    amount: amount,
+    payment_method_types: ["card"],
+  });
+  res.send({
+    clientSecret: paymentIntent.client_secret,
+  });
+  } catch (error) {
+    res.send(error.message)
+  }
+});
+
 app.put("/admin/:id", async (req, res) => {
   try {
     // const query = {}
@@ -220,6 +260,20 @@ app.put("/admin/:id", async (req, res) => {
       $set: {
         role: "admin",
         isAdmin: true,
+      },
+    };
+    const result = await userCollection.updateOne(query, updated, options);
+    res.send(result);
+  } catch (error) {
+    res.send(error.message);
+  }})
+app.put("/verified/:id", async (req, res) => {
+  try {
+    const query = { _id: ObjectId(req.params.id) };
+    const options = { upsert: true };
+    const updated = {
+      $set: {
+        verified: true
       },
     };
     const result = await userCollection.updateOne(query, updated, options);
