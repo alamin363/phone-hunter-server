@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
+const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 5000;
 require("dotenv").config();
@@ -15,6 +16,23 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
+
+function verifyJWT(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.send("unauthorized access");
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+    if (err) {
+      return res.send({ message: "UserNot Valid" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+}
 
 const run = async () => {
   try {
@@ -38,24 +56,11 @@ const allProductCollection = client
 const categoryCollection = client.db("mobileCollection").collection("category");
 const AdvertiseCollection = client
   .db("mobileCollection")
-  .collection("Advertise")
-/*  
-// get the items
-app.get('/product')
-app.get('/product/:id')
-// post the items
-app.post('/product')
-// update the items
-app.put('/product')
-app.put('/product/:id')
-// delete the items
-app.delete('product/:id);
-*/
+  .collection("Advertise");
 
-// const updateDoc = {
+// const update = {
 //   $set:{
 //     paid: true,
-//     transactionId: data.transactionId
 //   }
 // }
 
@@ -99,7 +104,10 @@ app.get("/myproduct", async (req, res) => {
 });
 app.get("/product", async (req, res) => {
   try {
-    const result = await allProductCollection.find({}).project({image: 1}).toArray();
+    const result = await allProductCollection
+      .find({})
+      .project({ image: 1 })
+      .toArray();
     res.send(result);
   } catch (error) {
     res.send(error.message);
@@ -117,16 +125,42 @@ app.get("/bookingProduct", async (req, res) => {
 });
 app.get("/user", async (req, res) => {
   try {
-    const users = await userCollection.find({}).toArray();
+    const users = await userCollection.find({role: "user"}).toArray();
     res.send(users);
   } catch (error) {
     res.send(error.message);
   }
 });
+app.get("/seller", async (req, res) => {
+  try {
+    const seller = await userCollection.find({role: "seller"}).toArray();
+    res.send(seller);
+  } catch (error) {
+    res.send(error.message);
+  }
+});
+// create jwt ----
+app.get("/jwtgenaretor/:email", async (req, res) => {
+  try {
+    const email = req.params.email;
+    console.log(email);
+    const query = { email: email };
+    const user = await userCollection.findOne(query);
+    if (user) {
+      const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, {
+        expiresIn: "10h",
+      });
+      return res.send({ accessToken: token });
+    }
+    res.send({ accessToken: "" });
+  } catch (error) {
+    console.log(error.message);
+  }
+});
 // PROBLAME IS BOGE BRO
 app.get("/user/:email", async (req, res) => {
   try {
-    const query = {email: req.params.email}
+    const query = { email: req.params.email };
     const user = await userCollection.findOne(query);
     res.send(user);
   } catch (error) {
@@ -226,8 +260,8 @@ app.delete("/ads/:id", async (req, res) => {
 // delete user and seller by admin
 app.delete("/usersseler/:id", async (req, res) => {
   try {
-    console.log(req.params.id)
-    const query = { _id: ObjectId(req.params.id )};
+    console.log(req.params.id);
+    const query = { _id: ObjectId(req.params.id) };
     const result = await userCollection.deleteOne(query);
     res.send(result);
   } catch (error) {
