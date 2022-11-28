@@ -226,9 +226,10 @@ app.delete("/ads/:id", async (req, res) => {
 // delete user and seller by admin
 app.delete("/usersseler/:id", async (req, res) => {
   try {
+    console.log(req.params.id)
     const query = { _id: ObjectId(req.params.id )};
-    // const result = await userCollection.deleteOne(query);
-    // res.send(result);
+    const result = await userCollection.deleteOne(query);
+    res.send(result);
   } catch (error) {
     res.send(error.message);
   }
